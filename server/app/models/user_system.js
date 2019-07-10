@@ -2,7 +2,7 @@
  * @Author: yinxl 
  * @Date: 2019-07-08 16:52:54 
  * @Last Modified by: yinxl
- * @Last Modified time: 2019-07-09 15:35:40
+ * @Last Modified time: 2019-07-10 14:53:23
  */
 
 const Sequelize = require('sequelize');
@@ -19,27 +19,12 @@ const UserSystem = sequelize.define('usersystem', {
         type: Sequelize.STRING,
         allowNull:false,
         field: 'system_id'
-    },
-    creatBy: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        field: 'creat_by'
-    },
-    updateBy: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        field: 'update_by'
-    },
-    mainHeader: {
-        type: Sequelize.STRING,
-        field: 'main_header'
-    },
-    viceHeader: {
-        type: Sequelize.STRING,
-        field: 'vice_header'
     }
 }, {
     freezeTableName: false,
     autoIncrement: true
 });
+
+const usersystem = UserSystem.sync({ force: false });
+
 module.exports = UserSystem;

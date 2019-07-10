@@ -2,7 +2,7 @@
  * @Author: yinxl 
  * @Date: 2019-07-08 09:17:51 
  * @Last Modified by: yinxl
- * @Last Modified time: 2019-07-08 16:48:58
+ * @Last Modified time: 2019-07-10 16:54:12
  */
 const uuidv1 = require('uuid/v1');
 const jsonwebtoken = require('jsonwebtoken');
@@ -44,7 +44,7 @@ const login = async (ctx, next) => { //登录
             msg: '登录成功',
             data: user,
             token: jsonwebtoken.sign({
-                data: user.userName,
+                data: user.userId,
                 // 设置 token 过期时间
                 exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 60 seconds * 60 minutes = 1 hour
             }, jwtSecret)
@@ -102,7 +102,7 @@ const getUserInfo = async (ctx, next) => {
     const istoken = jsonwebtoken.verify(token, jwtSecret);
     ctx.status = 200;
     if (istoken) { //验证token
-        const user = await User_tbl.findUserInfo(istoken.data);
+        const user = await User_tbl.findById(istoken.data);
         if (user) {
             ctx.body = {
                 code: 1,
@@ -123,8 +123,59 @@ const getUserInfo = async (ctx, next) => {
     }
 }
 
+//更新用户数据
+const updateUser = async (ctx, next) => {
+    const req = ctx.request.body;
+    ctx.status = 200;
+    const password = await passport.encrypt(req.password, config.saltTimes); //密码加密
+    const updateUser = User_tbl.updateUser({
+        userId: req.userId,
+        password: password,
+        passStrength: req.passStrength,
+        nickName: req.nickName,
+        email: req.email,
+        delFlag: req.delFlag,
+        avatar: req.avatar,
+        status: req.status,
+        defaultRole: req.defaultRole
+    });
+    if (updateUser) {
+        ctx.body = {
+            code: 1,
+            msg: '更新成功！',
+            data: updateUser
+        };
+    } else {
+        ctx.body = {
+            code: 0,
+            msg: '更新失败！'
+        };
+    }   
+}
+
+//更新用户数据
+const deleteUser = async (ctx, next) => {
+    const req = ctx.request.body;
+    ctx.status = 200;
+    const deleteUser = User_tbl.deleteUser(req.userId);
+    if (updateUser) {
+        ctx.body = {
+            code: 1,
+            msg: '删除成功！',
+            data: deleteUser
+        };
+    } else {
+        ctx.body = {
+            code: 0,
+            msg: '删除失败！'
+        };
+    }   
+}
+
 module.exports = {
     login,
     register,
-    getUserInfo
+    getUserInfo,
+    updateUser,
+    deleteUser
 }

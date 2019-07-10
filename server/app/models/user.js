@@ -2,13 +2,12 @@
  * @Author: yinxl 
  * @Date: 2019-07-08 09:59:11 
  * @Last Modified by: yinxl
- * @Last Modified time: 2019-07-09 16:38:01
+ * @Last Modified time: 2019-07-10 17:10:10
  */
 
 const Sequelize = require('sequelize');
 const sequelize = require('../../db');
-const User_system = require('./user_system');
-const System = require('./system');
+const UserSystem = require('./user_system');
 
 // 创建 model
 const User = sequelize.define('user', {
@@ -73,11 +72,7 @@ const User = sequelize.define('user', {
 // 默认情况下 forse = false
 const user = User.sync({ force: false });
 
-
-User.belongsToMany(System, { through: User_system, foreignKey: 'userId' });
-System.belongsToMany(User, { through: User_system ,foreignKey: 'systemId'});
-
-User.addSystem(User_system, { mainHeader: 'yinxl' })
+UserSystem.belongsTo(User, { foreignKey: 'userId', targetKey: 'userId' });
 // 添加新用户
 exports.addUser = function({userId, userName, password,passStrength}) {
     // 向 user 表中插入数据
@@ -89,24 +84,49 @@ exports.addUser = function({userId, userName, password,passStrength}) {
     });
 };
 
+exports.updateUser = function({userId, password,passStrength,nickName, email,delFlag,avatar,status,defaultRole,systems}) {
+    return User.update({
+        password: password,
+        passStrength: passStrength,
+        nickName: nickName,
+        email: email,
+        delFlag: delFlag,
+        avatar: avatar,
+        status: status,
+        defaultRole: defaultRole
+    },{
+        where: {
+            userId: userId
+        }
+    });
+};
+
+exports.deleteUser = function(userId) {
+    return User.destroy({
+        where: {
+            userId: userId
+        }
+    });
+};
+
 // 通过用户名查找用户
 exports.findByName = function(userName) {
     return User.findOne({ where: { user_name: userName } });
 };
 
 // 通过用户名查找用户,不显示密码
-exports.findUserInfo = function(userName) {
+exports.findById = function(userId) {
     return User.findOne({
+        attributes: { 
+            exclude: ['password'] 
+        },
         include: [
             {
-                model: User,
+                model: UserSystem,
                 through: {
                     where: { 
-                        user_name: userName 
+                        user_id: userId 
                     },
-                    attributes: { 
-                        exclude: ['password'] 
-                    }
                 }
             }
         ]

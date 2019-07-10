@@ -2,7 +2,7 @@
  * @Author: yinxl 
  * @Date: 2019-07-08 08:57:35 
  * @Last Modified by: yinxl
- * @Last Modified time: 2019-07-08 09:56:18
+ * @Last Modified time: 2019-07-10 15:52:20
  */
 const Koa = require('koa');
 const config = require('./config');
@@ -41,4 +41,8 @@ app.use(jwtKoa({
 
 const user_router = require('./routes/user_router');
 app.use(user_router.routes()).use(user_router.allowedMethods());
+
+const system_router = require('./routes/system_router');
+app.use(system_router.routes()).use(system_router.allowedMethods());
+
 app.listen(config.port);
